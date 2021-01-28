@@ -1,9 +1,8 @@
 name: build
 
 on:
-  push:
-    branches: [ main ]
   pull_request:
+  push:
 
 jobs:
   xgo:
@@ -11,7 +10,8 @@ jobs:
       fail-fast: false
       matrix:
         go_version:
-          - 1.15
+          - 1.12.4
+          - 1.13.x
     runs-on: ubuntu-latest
     steps:
       -
