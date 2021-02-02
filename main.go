@@ -5,9 +5,58 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
+	"os"
 	"strings"
+	"time"
+
+	"github.com/gen2brain/beeep"
 )
+
+var urlsV4 = []string{
+	"https://api.ipify.org?format=json",
+	"https://api4.my-ip.io/ip.json",
+	"https://ip4.seeip.org/json",
+	"https://ipinfo.io",
+}
+
+var urlsV6 = []string{
+	"https://api64.ipify.org?format=json",
+	"https://api6.my-ip.io",
+	"https://api6.my-ip.io/ip.json",
+	"https://ipinfo.io",
+}
+
+func logToFile(file string, message string) {
+	f, err := os.OpenFile(file, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		log.Println(err)
+	}
+	defer f.Close()
+
+	ip := "| " + message
+	logger := log.New(f, "", log.LstdFlags)
+	logger.Println(ip)
+}
+
+func notify(title string, message string, logFile string) {
+
+	err := beeep.Beep(beeep.DefaultFreq, beeep.DefaultDuration)
+	if err != nil {
+		panic(err)
+	}
+
+	err = beeep.Notify(title, message, "")
+	if err != nil {
+		panic(err)
+	}
+
+	if logFile != "" {
+		logToFile(logFile, message)
+	}
+
+}
 
 func request(urls []string) string {
 
@@ -37,46 +86,69 @@ func request(urls []string) string {
 	return ip
 }
 
+func doPrint(toPrint string) {
+	if toPrint == "all" {
+		fmt.Println(request(urlsV4))
+		fmt.Println(request(urlsV6))
+	} else if toPrint == "v4" {
+		fmt.Println(request(urlsV4))
+	} else if toPrint == "v6" {
+		fmt.Println(request(urlsV6))
+	} else {
+		fmt.Println(request(urlsV4))
+	}
+}
+
+func doNotify(toNotify string, log string, delay int) {
+	for {
+		time.Sleep(time.Minute * time.Duration(delay))
+
+		if toNotify == "all" {
+			notify("New IPv4:", request(urlsV4), log)
+			notify("New IPv6:", request(urlsV6), log)
+		} else if toNotify == "v4" {
+			notify("New IPv4:", request(urlsV4), log)
+		} else if toNotify == "v6" {
+			notify("New IPv6:", request(urlsV6), log)
+		} else {
+			notify("New IPv4:", request(urlsV4), log)
+		}
+
+		if delay < 5 {
+			fmt.Println("Sorry, I cannot use short delay during the APIs request limitation.")
+			fmt.Println("Recommended to use +5 minutes delay.")
+			break
+		}
+	}
+}
+
 func main() {
-	urlsV4 := []string{
-		"https://api.ipify.org?format=json",
-		"https://api4.my-ip.io/ip.json",
-		"https://ip4.seeip.org/json",
-		"https://ipinfo.io",
-	}
-
-	urlsV6 := []string{
-		"https://api64.ipify.org?format=json",
-		"https://api6.my-ip.io",
-		"https://api6.my-ip.io/ip.json",
-		"https://ipinfo.io",
-	}
-
-	v4 := flag.Bool("v4", true, "Show my public IPv4.")
-	v6 := flag.Bool("v6", false, "Show my public IPv6.")
+	v4 := flag.Bool("4", false, "Show my public IPv4.")
+	v6 := flag.Bool("6", false, "Show my public IPv6.")
 	all := flag.Bool("a", false, "Show my public IPv4 & IPv6.")
+	ntfy := flag.Bool("n", false, "Show desktop notifications. (Continues check every 10 min)")
+	log := flag.String("l", "", "Log new IP address (use with '-n' flag).")
+	delay := flag.Int("d", 10, "Run in loop to notify every X minutes.")
 	flag.Parse()
 
-	// if *all || *v4 && *v6 {
-	// 	fmt.Println(request(urlsV4))
-	// 	fmt.Println(request(urlsV6))
-	// } else if *v6 {
-	// 	fmt.Println(request(urlsV6))
-	// } else if *v4 {
-	// 	fmt.Println(request(urlsV4))
-	// } else {
-	// 	fmt.Println(request(urlsV4))
-	// }
-
 	switch {
+	case *ntfy:
+		if *all || *v4 && *v6 {
+			doNotify("all", *log, *delay)
+		} else if *v4 {
+			doNotify("v4", *log, *delay)
+		} else if *v6 {
+			doNotify("v6", *log, *delay)
+		} else {
+			doNotify("v4", *log, *delay)
+		}
 	case *all || *v4 && *v6:
-		fmt.Println(request(urlsV4))
-		fmt.Println(request(urlsV6))
-	case *v6:
-		fmt.Println(request(urlsV6))
+		doPrint("all")
 	case *v4:
-		fmt.Println(request(urlsV4))
+		doPrint("v4")
+	case *v6:
+		doPrint("v6")
 	default:
-		fmt.Println(request(urlsV4))
+		doPrint("v4")
 	}
 }
