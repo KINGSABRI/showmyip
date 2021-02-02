@@ -10,6 +10,7 @@ I've built this greatly silly app to learn Go and I needed a command line to sho
 ```
 $ git clone https://github.com/KINGSABRI/showmyip.git
 $ cd showmyip
+# go get -d ./...
 $ go build main.go
 $ sudo cp main /usr/bin/
 ```
