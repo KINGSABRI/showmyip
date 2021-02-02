@@ -2,7 +2,7 @@
 A very simple command line to get your public IP 
 
 ## Why?
-I've built this greatly silly app to learn Go and I needed a command line to show my public ip address.
+I've built this greatly silly app to learn Go and I needed a command line to show and periodically log my public ip address during external pentest and red teaming engagements.
 
 ## Usage
 
