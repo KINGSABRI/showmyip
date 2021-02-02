@@ -18,9 +18,22 @@ $ sudo cp main /usr/bin/
 ```
 showmyip -h
 Usage of showmyip:
+  -4    Show my public IPv4.
+  -6    Show my public IPv6.
   -a    Show my public IPv4 & IPv6.
-  -v4
-        Show my public IPv4. (default true)
-  -v6
-        Show my public IPv6.
+  -d int
+        Run in loop to notify every X minutes. (default 10)
+  -l string
+        Log new IP address (use with '-n' flag).
+  -n    Show desktop notifications. (Continues check every 10 min)
 ```
+
+### Examples 
+```
+$ showmyip
+$ showmyip -4 
+$ showmyip -6 
+$ showmyip -a
+$ showmyip -a -n -l ip.log -d 10
+```
+
