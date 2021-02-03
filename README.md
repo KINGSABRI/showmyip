@@ -38,3 +38,38 @@ $ showmyip -a
 $ showmyip -a -n -l ip.log -d 10
 ```
 
+## Run it as a service
+
+### Linux (Systemd)
+
+- Create a systemd service file
+
+```
+sudo nano /etc/systemd/system/showmyip.service
+```
+
+- Edit then Paste the following configuration file
+```
+[Unit]
+Description = ShowMyIP Desktop Notifcation and Log
+After = network.target
+StartLimitIntervalSec = 0
+
+[Service]
+Type = simple
+User = KING
+ExecStart = /usr/bin/showmyip -n -4 -l /home/YOURUSER/.showmyip/ip.log -d 20
+Restart = always
+RestartSec = 1
+StartLimitBurst = 5
+StartLimitIntervalSec = 10
+WantedBy=multi-user.target
+
+[Install]
+WantedBy=multi-user.target
+```
+
+```
+$ sudo systemctl start showmyip.service
+$ sudo systemctl enable showmyip.service
+```
