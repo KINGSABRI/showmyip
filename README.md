@@ -12,7 +12,7 @@ $ git clone https://github.com/KINGSABRI/showmyip.git
 $ cd showmyip
 # go get -d ./...
 $ go build main.go
-$ sudo cp main /usr/bin/
+$ sudo cp main /usr/bin/showmyip
 ```
 
 - run it
